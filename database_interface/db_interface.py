@@ -23,7 +23,12 @@ class DatabaseInterface:
                 return pd.read_sql(f'select {cols} from {table_name}', con=conn)
 
     def record_count(self, table_name):
-        return self.execute(f'select count(*) from {table_name}')
+        r = self.execute(f'select count(*) from {table_name}')
+        return r.fetchone()[0]
+
+    def fetch(self, sql):
+        r = self.execute(sql)
+        return r.fetchall()
 
     def execute(self, sql):
         with self.engine.connect() as conn:
@@ -31,7 +36,7 @@ class DatabaseInterface:
 
     def execute_sql_file(self, sql_path):
         with open(sql_path) as f:
-            self.execute(f.read().strip())
+            return self.execute(f.read().strip())
 
     def append_df(self, dataframe, table_name):
         self._write_df(dataframe, table_name, if_exists='append')
