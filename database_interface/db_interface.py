@@ -5,11 +5,17 @@ from sqlalchemy.sql import text
 
 
 class DatabaseInterface:
-    def __init__(self, user=None, passwd=None, server='localhost', database='rt_analytics'):
+    def __init__(self, user=None, passwd=None, server='localhost',
+                 database='rt_analytics', flavor='mysql', verbose=False):
         user = urllib.parse.quote(user)
         passwd = urllib.parse.quote(passwd)
-        self.engine = create_engine(f'mysql+pymysql://{user}:{passwd}@{server}/{database}?charset=utf8mb4',
-                                    echo=True)
+        if flavor == 'mysql':
+            connection_string = f'mysql+pymysql://{user}:{passwd}@{server}/{database}?charset=utf8mb4'
+        elif flavor == 'mssql':
+            connection_string = f'mssql+pymssql://{user}:{passwd}@{server}/{database}?charset=utf8'
+        else:
+            raise Exception(f'unimplemented database type {flavor}')
+        self.engine = create_engine(connection_string, echo=verbose)
 
     def read_df(self, table_name=None, cols=None, sql=None):
         with self.engine.connect() as conn:
