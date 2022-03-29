@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "database-interface"
-version = "0.1.3"
+version = "0.1.4"
 description = ""
 authors = ["cbarne02 <Christopher.Barnett@tufts.edu>"]
 
@@ -9,6 +9,7 @@ python = "^3.9"
 pandas = "^1.4.1"
 PyMySQL = "^1.0.2"
 SQLAlchemy = "^1.4.32"
+pymssql = "^2.2.4"
 
 [tool.poetry.dev-dependencies]
 

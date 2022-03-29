@@ -1,6 +1,6 @@
 import pandas as pd
 import urllib.parse
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect
 from sqlalchemy.sql import text
 
 
@@ -16,6 +16,7 @@ class DatabaseInterface:
         else:
             raise Exception(f'unimplemented database type {flavor}')
         self.engine = create_engine(connection_string, echo=verbose)
+        self.database = database
 
     def read_df(self, table_name=None, cols=None, sql=None):
         with self.engine.connect() as conn:
@@ -43,6 +44,10 @@ class DatabaseInterface:
     def execute_sql_file(self, sql_path):
         with open(sql_path) as f:
             return self.execute(f.read().strip())
+
+    def has_table(self, table_name):
+        insp = inspect(self.engine)
+        return insp.has_table(table_name, schema=self.database)
 
     def append_df(self, dataframe, table_name):
         self._write_df(dataframe, table_name, if_exists='append')
