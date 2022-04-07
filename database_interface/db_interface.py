@@ -41,9 +41,11 @@ class DatabaseInterface:
         with self.engine.connect() as conn:
             return conn.execute(text(sql))
 
-    def execute_sql_file(self, sql_path):
+    def execute_sql_file(self, sql_path, format_strings=None):
+        if format_strings is None:
+            format_strings = {}
         with open(sql_path) as f:
-            return self.execute(f.read().strip())
+            return self.execute(f.read().strip().format(**format_strings))
 
     def has_table(self, table_name):
         insp = inspect(self.engine)
