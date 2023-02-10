@@ -30,7 +30,22 @@ class DatabaseInterface:
                 return pd.read_sql(f'select {cols} from {table_name}', con=conn)
 
     def record_count(self, table_name):
-        r = self.execute(f'select count(*) from {table_name}')
+        """
+        returns 0 if the table is empty
+        :param table_name:
+        :return:
+        """
+        r = self.execute(f'select coalesce(count(*), 0) from {table_name}')
+        return r.fetchone()[0]
+
+    def check_last_date(self, date_col, table_name):
+        """
+        :returns current time if no records
+        :param date_col:
+        :param table_name:
+        :return:
+        """
+        r = self.execute(f'select coalesce(max({date_col}), now()) from {table_name}')
         return r.fetchone()[0]
 
     def fetch(self, sql):

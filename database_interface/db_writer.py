@@ -4,10 +4,10 @@ import urllib.parse
 
 
 class DBWriter:
-    def __init__(self, user=None, passwd=None):
+    def __init__(self, user=None, passwd=None, db='rt_analytics', host='localhost'):
         user = urllib.parse.quote(user)
         passwd = urllib.parse.quote(passwd)
-        self.engine = create_engine(f'mysql+pymysql://{user}:{passwd}@localhost/rt_analytics?charset=utf8mb4', echo=True)
+        self.engine = create_engine(f'mysql+pymysql://{user}:{passwd}@{host}/{db}?charset=utf8mb4', echo=True)
 
     def persist(self, rows, batch_size=50):
         for i in range(0, len(rows), batch_size):
