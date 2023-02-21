@@ -1,13 +1,14 @@
-from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
-import urllib.parse
+
+from .utils import create_db_engine
 
 
 class DBWriter:
-    def __init__(self, user=None, passwd=None, db='rt_analytics', host='localhost'):
+    def __init__(self, user=None, passwd=None, db='rt_analytics', host='localhost', flavor='mysql', verbose=False):
         user = urllib.parse.quote(user)
         passwd = urllib.parse.quote(passwd)
-        self.engine = create_engine(f'mysql+pymysql://{user}:{passwd}@{host}/{db}?charset=utf8mb4', echo=True)
+
+        self.engine = create_db_engine(user, passwd, host, db, flavor, verbose)
 
     def persist(self, rows, batch_size=50):
         for i in range(0, len(rows), batch_size):

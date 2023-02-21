@@ -1,21 +1,16 @@
 import pandas as pd
-import urllib.parse
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import inspect
 from sqlalchemy.sql import text
+from .utils import create_db_engine
 
 
 class DatabaseInterface:
     def __init__(self, user=None, passwd=None, server='localhost',
-                 database='rt_analytics', flavor='mysql', verbose=False):
-        user = urllib.parse.quote(user)
-        passwd = urllib.parse.quote(passwd)
-        if flavor == 'mysql':
-            connection_string = f'mysql+pymysql://{user}:{passwd}@{server}/{database}?charset=utf8mb4'
-        elif flavor == 'mssql':
-            connection_string = f'mssql+pymssql://{user}:{passwd}@{server}/{database}?charset=utf8'
+                 database='rt_analytics', flavor='mysql', verbose=False, engine=None):
+        if engine is None:
+            self.engine = create_db_engine(user, passwd, server, database, flavor, verbose=verbose)
         else:
-            raise Exception(f'unimplemented database type {flavor}')
-        self.engine = create_engine(connection_string, echo=verbose)
+            self.engine = engine
         self.database = database
 
     def read_df(self, table_name=None, cols=None, sql=None):
