@@ -23,3 +23,4 @@ def create_db_engine(user=None, passwd=None, server='localhost', database='rt_an
     else:
         raise Exception(f'unimplemented database type {flavor}')
     return create_engine(connection_string, echo=verbose)
+
