@@ -6,7 +6,7 @@ authors = ["cbarne02 <Christopher.Barnett@tufts.edu>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-pandas = "^1.4.1"
+pandas = "^2.0.0rc0"
 PyMySQL = "^1.0.2"
 SQLAlchemy = "^2.0.3"
 pymssql = "^2.2.4"
