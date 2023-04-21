@@ -60,7 +60,7 @@ class DatabaseInterface:
         :param table_name:
         :return:
         """
-        r = self.execute(f'select coalesce(max({date_col}), now()) from {table_name}')
+        r = self.execute(f"select coalesce(max('{date_col}'), now()) from {table_name}")
         return r.fetchone()[0]
 
     def fetch(self, sql):
