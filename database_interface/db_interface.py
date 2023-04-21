@@ -55,12 +55,12 @@ class DatabaseInterface:
 
     def check_last_date(self, date_col, table_name):
         """
-        :returns current time if no records
+        :returns None if no records
         :param date_col:
         :param table_name:
         :return:
         """
-        r = self.execute(f"select coalesce(max('{date_col}'), now()) from {table_name}")
+        r = self.execute(f"select max('{date_col}') from {table_name}")
         return r.fetchone()[0]
 
     def fetch(self, sql):
