@@ -66,7 +66,7 @@ class DatabaseInterface:
         :return:
         """
         r = self.execute(f"select max('{date_col}') from {table_name}")
-        latest = r.fetchone()
+        latest = r.fetchone()[1]
         if latest is not None and type(latest) is str:
             try:
                 return datetime.datetime.strptime(latest, '%Y-%m-%d')
