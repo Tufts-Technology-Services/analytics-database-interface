@@ -6,7 +6,7 @@ import datetime
 import logging
 
 
-LOG = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
 class DatabaseInterface:
@@ -67,9 +67,13 @@ class DatabaseInterface:
         """
         r = self.execute(f"select max('{date_col}') from {table_name}")
         latest = r.fetchone()[0]
-        LOG.debug(f'latest is [{latest}] of type [{type(latest)}]')
         if latest is not None and type(latest) is str:
-            return datetime.datetime.strptime(latest, '%Y-%m-%d')
+            try:
+                return datetime.datetime.strptime(latest, '%Y-%m-%d')
+            except ValueError as e:
+                log.error(e)
+                log.error(f'latest is [{latest}] of type [{type(latest)}]')
+                raise e
         else:
             return latest
 
