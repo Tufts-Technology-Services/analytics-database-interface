@@ -2,6 +2,7 @@ import pandas as pd
 from sqlalchemy import inspect
 from sqlalchemy.sql import text
 from .utils import create_db_engine
+import datetime
 
 
 class DatabaseInterface:
@@ -53,7 +54,7 @@ class DatabaseInterface:
         r = self.execute(f'select coalesce(count(*), 0) from {table_name}')
         return r.fetchone()[0]
 
-    def check_last_date(self, date_col, table_name):
+    def check_last_date(self, date_col, table_name) -> datetime.date:
         """
         :returns None if no records
         :param date_col:
@@ -61,7 +62,11 @@ class DatabaseInterface:
         :return:
         """
         r = self.execute(f"select max('{date_col}') from {table_name}")
-        return r.fetchone()[0]
+        latest = r.fetchone()[0]
+        if latest is not None and type(latest) is str:
+            return datetime.datetime.strptime(latest, '%Y-%m-%d')
+        else:
+            return latest
 
     def fetch(self, sql):
         """
