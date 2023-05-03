@@ -58,14 +58,17 @@ class DatabaseInterface:
         r = self.execute(f'select coalesce(count(*), 0) from {table_name}')
         return r.fetchone()[0]
 
-    def check_last_date(self, date_col, table_name) -> datetime.date:
+    def check_last_date(self, date_col, table_name, where_clause=None) -> datetime.date:
         """
-        :returns None if no records
         :param date_col:
         :param table_name:
-        :return:
+        :param where_clause:
+        :returnL None if no records
         """
-        r = self.execute(f"select max({date_col}) from {table_name}")
+        query = f"select max({date_col}) from {table_name}"
+        if where_clause is not None:
+            query = f"{query} {where_clause}"
+        r = self.execute(query)
         latest = r.fetchone()[0]
         if latest is not None and type(latest) is str:
             try:
