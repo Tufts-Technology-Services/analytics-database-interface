@@ -98,6 +98,16 @@ class DatabaseInterface:
         with self.engine.connect() as conn:
             return conn.execute(text(sql))
 
+    def execute_batch(self, sql_batch: list):
+        """
+        execute a batch of SQL commands in a single transaction
+        :param sql_batch:
+        :return:
+        """
+        with self.engine.connect() as conn:
+            for sql in sql_batch:
+                conn.execute(text(sql))
+
     def execute_sql_file(self, sql_path, format_strings=None):
         """
         execute a SQL command from a text file
