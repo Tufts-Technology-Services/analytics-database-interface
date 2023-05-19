@@ -156,5 +156,7 @@ class DatabaseInterface:
         :param if_exists:
         :return:
         """
+        if len(dataframe) == 0:
+            raise Exception('Empty dataframe!')
         with self.engine.connect() as conn:
             dataframe.to_sql(table_name, conn, if_exists=if_exists, index=False)
