@@ -21,7 +21,7 @@ class DBWriter:
             self.engine = create_db_engine(user, passwd, host, database, flavor, verbose=verbose)
         else:
             self.engine = engine
-        if self.transformer is None:
+        if transformer is None:
             raise EmptyTransformerError('transformer is a required argument!')
         else:
             self.transformer = transformer

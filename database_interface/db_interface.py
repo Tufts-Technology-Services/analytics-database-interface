@@ -94,6 +94,9 @@ class DatabaseInterface:
         execute a SQL command
         :param sql:
         :return:
+        sqlstr = 'DELETE FROM storage_starfish_path where _id in ' + id_to_update
+        # result = db_execute(sqlstr, con)
+        db.execute(sqlstr)
         """
         with self.engine.connect() as conn:
             return conn.execute(text(sql))
