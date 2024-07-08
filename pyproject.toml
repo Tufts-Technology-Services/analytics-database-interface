@@ -1,18 +1,12 @@
-[tool.poetry]
+[project]
 name = "database-interface"
-version = "0.1.5"
-description = ""
+version = "0.1.6"
+description = "code to abstract working with rt-analytics database"
 authors = ["cbarne02 <Christopher.Barnett@tufts.edu>"]
 
-[tool.poetry.dependencies]
-python = "^3.9"
-pandas = "^2.0.0rc1"
-PyMySQL = "^1.0.2"
-SQLAlchemy = "^2.0.6"
-pymssql = "^2.2.4"
-
-[tool.poetry.dev-dependencies]
-
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = [
+    "setuptools",
+    "some-build-toolkit",
+]
+build-backend = "setuptools.build_meta"

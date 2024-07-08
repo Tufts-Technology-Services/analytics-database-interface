@@ -4,24 +4,11 @@ Code for interfacing with the rt_analytics MySQL database.
 
 ## Installation
 
-add the following to the pyproject.toml file:
 ```
-[tool.poetry.dependencies]
-# Get the latest revision on the branch named "main"
-database-interface = { git = "https://gitlab.it.tufts.edu/rt-analytics/database-interface.git", branch = "main" }
+python -m pip install 'database-interface @ git+git@github.com:Tufts-Technology-Services/analytics-database-interface.git'
 
 ```
 
-```
-# Get a revision by its commit hash
-database-interface = { git = "https://gitlab.it.tufts.edu/rt-analytics/database-interface.git", rev = "38eb5d3b" }
-
-```
-
-```
-# Get a revision by its tag
-database-interface = { git = "https://gitlab.it.tufts.edu/rt-analytics/database-interface.git", tag = "v0.13.2" }
-```
 
 ## Usage
 
