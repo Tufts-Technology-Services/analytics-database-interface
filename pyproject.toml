@@ -7,6 +7,5 @@ authors = ["cbarne02 <Christopher.Barnett@tufts.edu>"]
 [build-system]
 requires = [
     "setuptools",
-    "some-build-toolkit",
 ]
 build-backend = "setuptools.build_meta"
