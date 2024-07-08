@@ -56,7 +56,18 @@ Return the number of records in a table:
 count = db.record_count('fis_users')
 ```
 
+dump a table in rt_analytics to CSV
+```python
+dump_table('fis_users', out_csv_path)
+```
 
+expects the following environment variables to be set:
+```shell
+export RT_DB_USERNAME=username
+export RT_DB_PASSWORD=password
+export RT_DB_SERVER=hostname  # defaults to 'localhost'. optional
+export RT_DB=database_name    # defaults to 'rt_analtyics'. optional)
+```
 
 
 
