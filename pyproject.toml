@@ -2,10 +2,17 @@
 name = "database-interface"
 version = "0.1.6"
 description = "code to abstract working with rt-analytics database"
-authors = ["cbarne02 <Christopher.Barnett@tufts.edu>"]
+authors = [{name="Chris Barnett", email="Christopher.Barnett@tufts.edu"}]
+dependencies = [
+    "pandas>=2.0",
+    "PyMySQL>=1.1.0",
+    "SQLAlchemy>=2.0",
+    "pytest"
+]
+requires-python = ">= 3.11"
 
 [build-system]
 requires = [
-    "setuptools",
+    "setuptools >= 61.0",
 ]
 build-backend = "setuptools.build_meta"
