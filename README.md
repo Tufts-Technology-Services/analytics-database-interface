@@ -19,7 +19,7 @@ db = DatabaseInterface(user=user, passwd=passwd)
 
 to specify database and server values:
 ```python
-db = DatabaseInterface(user=user, passwd=passwd, server='localhost', database='rt_analytics')  # defaults shown
+db = DatabaseInterface(user=user, passwd=passwd, server='localhost', database='rt_analytics', flavor='postgres')  # defaults shown
 ```
 
 
@@ -28,7 +28,13 @@ Read a table into a Pandas dataframe:
 fis_df = db.read_df('fis_users')
 ```
 
-Append a Pandas dataframe to a table:
+Upsert records
+```python
+
+db.upsert_df(dataframe=fis_df, table_name='fis_users')
+
+
+Append a Pandas dataframe to a table (only with postgres):
 ```python
 db.append_df(dataframe=fis_df, table_name='fis_users')
 
@@ -55,17 +61,7 @@ Return the number of records in a table:
 count = db.record_count('fis_users')
 ```
 
-dump a table in rt_analytics to CSV
-```python
-dump_table('fis_users', out_csv_path)
-```
 
-expects the following environment variables to be set:
-```shell
-export RT_DB_USERNAME=username
-export RT_DB_PASSWORD=password
-export RT_DB_SERVER=hostname  # defaults to 'localhost'. optional
-export RT_DB=database_name    # defaults to 'rt_analtyics'. optional)
 ```
 
 

@@ -14,7 +14,7 @@ class DatabaseInterface:
     Used to handle low level database operations and centralize database code.
     """
     def __init__(self, user=None, passwd=None, host='localhost',
-                 database='rt_analytics', verbose=False, engine=None):
+                 database='rt_analytics', verbose=False, engine=None, flavor='postgres'):
         """
         provide database connection string info. alternatively, pass an existing SQLAlchemy engine
         :param user:
@@ -23,9 +23,10 @@ class DatabaseInterface:
         :param database:
         :param verbose:
         :param engine:
+        :param flavor:
         """
         if engine is None:
-            self.engine = create_db_engine(user, passwd, host, database, verbose=verbose)
+            self.engine = create_db_engine(user, passwd, host, database, verbose=verbose, flavor=flavor)
         else:
             self.engine = engine
         self.database = database
