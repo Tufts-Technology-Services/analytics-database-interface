@@ -1,7 +1,7 @@
 import pandas as pd
 from sqlalchemy import inspect
 from sqlalchemy.sql import text
-from .utils import create_db_engine
+from rt_analytics.database_interface.utils import create_db_engine
 import datetime
 import logging
 
@@ -14,19 +14,18 @@ class DatabaseInterface:
     Used to handle low level database operations and centralize database code.
     """
     def __init__(self, user=None, passwd=None, host='localhost',
-                 database='rt_analytics', flavor='mysql', verbose=False, engine=None):
+                 database='rt_analytics', verbose=False, engine=None):
         """
         provide database connection string info. alternatively, pass an existing SQLAlchemy engine
         :param user:
         :param passwd:
         :param host:
         :param database:
-        :param flavor:
         :param verbose:
         :param engine:
         """
         if engine is None:
-            self.engine = create_db_engine(user, passwd, host, database, flavor, verbose=verbose)
+            self.engine = create_db_engine(user, passwd, host, database, verbose=verbose)
         else:
             self.engine = engine
         self.database = database
@@ -89,7 +88,18 @@ class DatabaseInterface:
         r = self.execute(sql)
         return r.fetchall()
 
-    def execute(self, sql):
+    def drop_table(self, table_name):
+        """
+        drop the given table
+        :param table_name:
+        :return:
+        """
+        sql = f'DROP TABLE IF EXISTS {table_name}'
+        with self.engine.connect() as conn:
+            conn.execute(sql)
+            
+
+    def execute(self, sql, format_strings={}):
         """
         execute a SQL command
         :param sql:
@@ -99,7 +109,7 @@ class DatabaseInterface:
         db.execute(sqlstr)
         """
         with self.engine.connect() as conn:
-            return conn.execute(text(sql))
+            return conn.execute(text(sql), format_strings)
 
     def execute_batch(self, sql_batch: list):
         """
@@ -121,7 +131,7 @@ class DatabaseInterface:
         if format_strings is None:
             format_strings = {}
         with open(sql_path) as f:
-            return self.execute(f.read().strip().format(**format_strings))
+            return self.execute(f.read().replace('\n', ' ').strip(), format_strings)
 
     def has_table(self, table_name):
         """
@@ -140,6 +150,77 @@ class DatabaseInterface:
         :return:
         """
         self._write_df(dataframe, table_name, if_exists='append')
+
+    def upsert_df(self, dataframe, table_name, temp_table='temp_table', schema=None, match_columns=None, insert_only=False):
+        """
+        # Copyright 2024 Gordon D. Thompson, gord@gordthompson.com
+        #
+        # Licensed under the Apache License, Version 2.0 (the "License");
+        # you may not use this file except in compliance with the License.
+        # You may obtain a copy of the License at
+        #
+        #     http://www.apache.org/licenses/LICENSE-2.0
+        #
+        # Unless required by applicable law or agreed to in writing, software
+        # distributed under the License is distributed on an "AS IS" BASIS,
+        # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        # See the License for the specific language governing permissions and
+        # limitations under the License.
+
+        # version 1.3 - 2024-06-21
+        # from https://gist.github.com/gordthompson/ae7a1528fde1c00c03fdbb5c53c8f90f
+
+        Perform an "upsert" on a PostgreSQL table from a DataFrame.
+        Constructs an INSERT … ON CONFLICT statement, uploads the DataFrame to a
+        temporary table, and then executes the INSERT.
+        Parameters
+        ----------
+        dataframe : pandas.DataFrame
+            The DataFrame to be upserted.
+        table_name : str
+            The name of the target table.
+        engine : sqlalchemy.engine.Engine
+            The SQLAlchemy Engine to use.
+        schema : str, optional
+            The name of the schema containing the target table.
+        match_columns : list of str, optional
+            A list of the column name(s) on which to match. If omitted, the
+            primary key columns of the target table will be used.
+        insert_only : bool, optional
+            On conflict do not update. (Default: False)
+        """
+        table_spec = ""
+        if schema:
+            table_spec += '"' + schema.replace('"', '""') + '".'
+        table_spec += '"' + table_name.replace('"', '""') + '"'
+
+        df_columns = list(dataframe.columns)
+        if not match_columns:
+            insp = inspect(self.engine)
+            match_columns = insp.get_pk_constraint(table_name, schema=schema)[
+                "constrained_columns"
+            ]
+        columns_to_update = [col for col in df_columns if col not in match_columns]
+        insert_col_list = ", ".join([f'"{col_name}"' for col_name in df_columns])
+        stmt = f"INSERT INTO {table_spec} ({insert_col_list})\n"
+        stmt += f"SELECT {insert_col_list} FROM {temp_table}\n"
+        match_col_list = ", ".join([f'"{col}"' for col in match_columns])
+        stmt += f"ON CONFLICT ({match_col_list}) DO "
+        if insert_only:
+            stmt += "NOTHING"
+        else:
+            stmt += "UPDATE SET\n"
+            stmt += ", ".join(
+                [f'"{col}" = EXCLUDED."{col}"' for col in columns_to_update]
+            )
+
+        with self.engine.begin() as conn:
+            conn.exec_driver_sql(f"DROP TABLE IF EXISTS {temp_table}")
+            conn.exec_driver_sql(
+                f"CREATE TEMPORARY TABLE {temp_table} AS SELECT * FROM {table_spec} WHERE false"
+            )
+            dataframe.to_sql(temp_table, conn, if_exists="append", index=False)
+            conn.exec_driver_sql(stmt)
 
     def replace_df(self, dataframe, table_name):
         """

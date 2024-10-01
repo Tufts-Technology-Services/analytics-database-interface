@@ -1,11 +1,12 @@
 [project]
 name = "database-interface"
-version = "0.1.6"
+version = "0.2.0"
 description = "code to abstract working with rt-analytics database"
 authors = [{name="Chris Barnett", email="Christopher.Barnett@tufts.edu"}]
 dependencies = [
     "pandas>=2.0",
     "PyMySQL>=1.1.0",
+    "pyscopg2>=2.9.1",
     "SQLAlchemy>=2.0",
     "pytest"
 ]

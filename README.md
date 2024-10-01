@@ -5,10 +5,9 @@ Code for interfacing with the rt_analytics MySQL database.
 ## Installation
 
 ```
-python -m pip install 'database-interface @ git+git@github.com:Tufts-Technology-Services/analytics-database-interface.git'
+pip install git+ssh://git@github.com/Tufts-Technology-Services/analytics-database-interface.git
 
 ```
-
 
 ## Usage
 

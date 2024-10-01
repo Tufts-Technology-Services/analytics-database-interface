@@ -1,2 +1,2 @@
-from .db_interface import DatabaseInterface
-from .db_writer import DBWriter
+from database_interface.db_interface import DatabaseInterface
+from database_interface.db_writer import DBWriter
