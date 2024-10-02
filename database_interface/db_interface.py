@@ -1,7 +1,7 @@
 import pandas as pd
 from sqlalchemy import inspect
 from sqlalchemy.sql import text
-from rt_analytics.database_interface.utils import create_db_engine
+from database_interface.utils import create_db_engine
 import datetime
 import logging
 
