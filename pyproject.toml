@@ -5,12 +5,14 @@ description = "code to abstract working with rt-analytics database"
 authors = [{name="Chris Barnett", email="Christopher.Barnett@tufts.edu"}]
 dependencies = [
     "pandas>=2.0",
-    "PyMySQL",
-    "psycopg2-binary",
     "SQLAlchemy>=2.0",
     "pytest"
 ]
 requires-python = ">= 3.11"
+
+[project.optional-dependencies]
+mysql = ["PyMySQL"]
+postgres = ["psycopg2-binary"]
 
 [build-system]
 requires = [
