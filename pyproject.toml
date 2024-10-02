@@ -5,8 +5,8 @@ description = "code to abstract working with rt-analytics database"
 authors = [{name="Chris Barnett", email="Christopher.Barnett@tufts.edu"}]
 dependencies = [
     "pandas>=2.0",
-    "PyMySQL>=1.1.0",
-    "pyscopg2>=2.9.1",
+    "PyMySQL",
+    "pyscopg2-binary",
     "SQLAlchemy>=2.0",
     "pytest"
 ]
