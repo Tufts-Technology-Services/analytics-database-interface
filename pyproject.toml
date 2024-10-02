@@ -5,7 +5,7 @@ description = "code to abstract working with rt-analytics database"
 authors = [{name="Chris Barnett", email="Christopher.Barnett@tufts.edu"}]
 dependencies = [
     "pandas>=2.0",
-    "SQLAlchemy>=2.0",
+    "SQLAlchemy",
     "pytest"
 ]
 requires-python = ">= 3.11"
