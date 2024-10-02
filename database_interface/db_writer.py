@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from .utils import create_db_engine
+from database_interface.utils import create_db_engine
 
 
 class PersistenceError(Exception):
