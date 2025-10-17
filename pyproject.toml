@@ -1,6 +1,6 @@
 [project]
 name = "database-interface"
-version = "0.2.0"
+version = "0.3.0"
 description = "code to abstract working with rt-analytics database"
 authors = [{name="Chris Barnett", email="Christopher.Barnett@tufts.edu"}]
 dependencies = [
