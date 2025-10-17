@@ -10,88 +10,97 @@ class LookupClient:
         self.dbi = database_interface        
 
     def get_email(self, utln):
+        utln = utln.strip().lower()
         r = self.dbi.fetch(f"SELECT pr_identity_email FROM pr_fis WHERE pr_identity_utln = '{utln}'")
         if len(r) == 0:
             raise NoMatchFoundError(f'No match found for utln {utln}')
         return r[0][0]
 
     def utln_lookup(self, utln):
+        utln = utln.strip().lower()
         fields = [{"src": "pr_identity_utln", "tgt": "utln", "type": "keyword"}, 
                   {"src": "pr_identity_email", "tgt": "email", "type": "keyword"},
                   {"src": "pr_identity_firstname", "tgt": "first_name", "type": "keyword"},
                   {"src": "pr_identity_lastname", "tgt": "last_name", "type": "keyword"},
                   {"src": "user_primary_affiliation", "tgt": "primary_affiliation", "type": "keyword"},
-                  {"src": "user_primary_title", "tgt": "primary_title", "type": "keyword"},
+                  {"src": "pr_hr_title", "tgt": "primary_title", "type": "keyword"},
                   {"src": "user_primary_division", "tgt": "division", "type": "keyword"},
                   {"src": "user_primary_dept_prog", "tgt": "dept_prog", "type": "keyword"},
                   {"src": "user_primary_campus", "tgt": "campus", "type": "keyword"},
-                  {"src": "user_profile_link", "tgt": "profile_link", "type": "keyword"},
+                  {"src": "fis_public_url_fragment", "tgt": "profile_link", "type": "keyword"},
                   {"src": "user_pr_status", "tgt": "is_active", "type": "boolean"}]
-
+        search_fields = ', '.join([f['src'] for f in fields])
         sql = f"""
-          SELECT pr_identity_utln, pr_identity_email, pr_identity_firstname, pr_identity_lastname, 
-          user_primary_affiliation, pr_hr_title, pr_med_title, user_primary_division, user_primary_dept_prog, 
-          user_primary_campus, user_profile_link, user_pr_status FROM pr_fis WHERE pr_identity_utln = '{utln}'
+          SELECT {search_fields} FROM pr_fis WHERE pr_identity_utln = '{utln}'
           """
         r = self.dbi.fetch(sql)
         if len(r) == 0:
             raise NoMatchFoundError(f'No match found for utln {utln}')
-        return r[0]
+        info = {f['tgt']: r[0][i] for i, f in enumerate(fields)}
+        if info['is_active'] is not None:
+            info['is_active'] = True if info['is_active'].lower() == 'a' else False
+        if info['profile_link'] is not None:
+            info['profile_link'] = f'https://facultyprofiles.tufts.edu/{info["profile_link"]}'
+        return info
 
     def email_lookup(self, email):
-        r = self.dbi.fetch(f"SELECT pr_identity_utln as utln, pr_identity_email as email FROM pr_fis WHERE pr_identity_email = '{email}'")
+        em = normalize_email_address(email)
+        r = self.dbi.fetch(f"SELECT pr_identity_utln as utln, pr_identity_email as email FROM pr_fis WHERE pr_identity_email = '{em}'")
         if len(r) == 0:
             raise NoMatchFoundError(f'No match found for email {email}')
         return r[0][0]
 
     def course_lookup(self, course_num):
-        """
-        [
-  {
-    "src_name": "subject_cat_nbr",
-    "tgt_name": "catalog_no",
-    "tgt_type": "keyword",
-    "normalizer": "std_normalizer"
-  },
-  {
-    "src_name": "title",
-    "tgt_name": "title",
-    "tgt_type": "keyword",
-    "normalizer": "std_normalizer"
-  },
-  {
-    "src_name": "course_school",
-    "tgt_name": "school",
-    "tgt_type": "keyword",
-    "normalizer": "std_normalizer"
-  },
-  {
-    "src_name": "course_dept_prog",
-    "tgt_name": "dept_prog",
-    "tgt_type": "keyword",
-    "normalizer": "std_normalizer"
-  },
-  {
-    "src_name": "campus_ld",
-    "tgt_name": "campus_long",
-    "tgt_type": "keyword",
-    "normalizer": "std_normalizer"
-  },
-  {
-    "src_name": "campus_std",
-    "tgt_name": "campus",
-    "tgt_type": "keyword",
-    "normalizer": "std_normalizer"
-  },
-  {
-    "src_name": "course_title",
-    "tgt_name": "title_display",
-    "tgt_type": "keyword",
-    "normalizer": "std_normalizer"
-  }
-]
-        """
-        return self.dbi.fetch(f"SELECT pr_identity_utln as utln, pr_identity_email as email FROM pr_fis WHERE pr_identity_email = '{course_num}'")
+
+        fields = [
+            {
+                "src": "subject_cat_nbr_of_record",
+                "tgt": "catalog_no",
+                "tgt_type": "keyword",
+                "normalizer": "std_normalizer"
+            },
+            {
+                "src": "title_of_record",
+                "tgt": "title",
+                "tgt_type": "keyword",
+                "normalizer": "std_normalizer"
+            },
+            {
+                "src": "course_school_of_record",
+                "tgt": "school",
+                "tgt_type": "keyword",
+                "normalizer": "std_normalizer"
+            },
+            {
+                "src": "course_dept_prog_of_record",
+                "tgt": "dept_prog",
+                "tgt_type": "keyword",
+                "normalizer": "std_normalizer"
+            },
+            {
+                "src": "campus_ld",
+                "tgt": "campus_long",
+                "tgt_type": "keyword",
+                "normalizer": "std_normalizer"
+            },
+            {
+                "src": "campus_std",
+                "tgt": "campus",
+                "tgt_type": "keyword",
+                "normalizer": "std_normalizer"
+            }
+        ]
+
+        course_num = normalize_course_cat_no(course_num)
+        search_fields = ', '.join([f['src'] for f in fields])
+        sql = f"""
+          SELECT {search_fields} FROM courses_instructors WHERE subject_cat_nbr = '{course_num}'
+          """
+        r = self.dbi.fetch(sql)
+        if len(r) == 0:
+            raise NoMatchFoundError(f'No match found for course {course_num}')
+        info = {f['tgt']: r[0][i] for i, f in enumerate(fields)}
+        return info
 
     def jira_tag_from_mapping(self, tag):
         pass
@@ -108,9 +117,6 @@ class LookupClient:
             return match[0]
         else:
             raise APIError('too many matches in tag set.. please review')
-
-
-
 
 def normalize_email_address(email_address):
     """
@@ -136,9 +142,9 @@ def normalize_course_cat_no(course_catalog_no):
         course_catalog_no = ''
     pieces = course_catalog_no.strip().split()
     if len(pieces) >= 2:
-        return ' '.join(pieces[:2]).lower()
+        return ' '.join(pieces[:2]).upper()
     else:
         pieces = course_catalog_no.strip().split('_')
         if len(pieces) >=2:
-            return ' '.join(pieces[:2]).lower()
+            return ' '.join(pieces[:2]).upper()
     raise InvalidCourseCatalogNumberError('Malformed Course Catalog number')
