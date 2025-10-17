@@ -10,7 +10,7 @@ class LookupClient:
         self.dbi = database_interface        
 
     def get_email(self, utln):
-        r = self.dbi.fetch(f"SELECT pr_identity_email FROM pr_fis_vw WHERE pr_identity_utln = '{utln}'")
+        r = self.dbi.fetch(f"SELECT pr_identity_email FROM pr_fis WHERE pr_identity_utln = '{utln}'")
         if len(r) == 0:
             raise NoMatchFoundError(f'No match found for utln {utln}')
         return r[0][0]
@@ -39,7 +39,7 @@ class LookupClient:
         return r[0]
 
     def email_lookup(self, email):
-        r = self.dbi.fetch(f"SELECT pr_identity_utln as utln, pr_identity_email as email FROM pr_fis_vw WHERE pr_identity_email = '{email}'")
+        r = self.dbi.fetch(f"SELECT pr_identity_utln as utln, pr_identity_email as email FROM pr_fis WHERE pr_identity_email = '{email}'")
         if len(r) == 0:
             raise NoMatchFoundError(f'No match found for email {email}')
         return r[0][0]
@@ -91,7 +91,7 @@ class LookupClient:
   }
 ]
         """
-        return self.dbi.fetch(f"SELECT pr_identity_utln as utln, pr_identity_email as email FROM pr_fis_vw WHERE pr_identity_email = '{course_num}'")
+        return self.dbi.fetch(f"SELECT pr_identity_utln as utln, pr_identity_email as email FROM pr_fis WHERE pr_identity_email = '{course_num}'")
 
     def jira_tag_from_mapping(self, tag):
         pass
