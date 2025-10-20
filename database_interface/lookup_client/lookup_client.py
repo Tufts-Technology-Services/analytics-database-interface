@@ -109,8 +109,8 @@ class LookupClient:
         raise NotImplementedError('This method is not yet implemented')
 
     def get_rt_members(self):
-        r = self.dbi.fetch("SELECT utln FROM rt_staff WHERE rt_staff_status = 'A'")
-        return [i[0] for i in r]
+        r = self.dbi.fetch("SELECT utln, pr_identity_email FROM rt_staff LEFT JOIN pr_fis ON rt_staff.utln = pr_fis.pr_identity_utln")
+        return [{'utln': i[0], 'email': i[1]} for i in r]
     
     def get_tag_from_techconnect(self, tag):
         tags = self.get_tag_mappings()
