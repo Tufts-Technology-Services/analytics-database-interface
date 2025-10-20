@@ -44,7 +44,7 @@ class LookupClient:
         return info
 
     def email_lookup(self, email):
-        em = normalize_email_address(email)
+        em = LookupClient.normalize_email_address(email)
         r = self.dbi.fetch(f"SELECT pr_identity_utln as utln, pr_identity_email as email FROM pr_fis WHERE pr_identity_email = '{em}'")
         if len(r) == 0:
             raise NoMatchFoundError(f'No match found for email {email}')
@@ -91,7 +91,7 @@ class LookupClient:
             }
         ]
 
-        course_num = normalize_course_cat_no(course_num)
+        course_num = LookupClient.normalize_course_cat_no(course_num)
         search_fields = ', '.join([f['src'] for f in fields])
         sql = f"""
           SELECT {search_fields} FROM courses_instructors WHERE subject_cat_nbr = '{course_num}'
@@ -102,15 +102,33 @@ class LookupClient:
         info = {f['tgt']: r[0][i] for i, f in enumerate(fields)}
         return info
 
-    def jira_tag_from_mapping(self, tag):
-        raise NotImplementedError('This method is not yet implemented')
-
-    def get_tag_mappings(self):
-        raise NotImplementedError('This method is not yet implemented')
-
     def get_rt_members(self):
         r = self.dbi.fetch("SELECT utln, pr_identity_email FROM rt_staff LEFT JOIN pr_fis ON rt_staff.utln = pr_fis.pr_identity_utln")
         return [{'utln': i[0], 'email': i[1]} for i in r]
+
+    def get_tag_mappings(self):
+        r = self.dbi.fetch("SELECT value, snow_tag FROM rt_service_areas union SELECT value, snow_tag FROM rt_components")
+        return [{'jira_value': i[0], 'snow_tag': i[1], 'type': 'service_area' if i[1].startswith('sa.') else 'component'} for i in r]
+    
+    def jira_component_from_mapping(self, tag):
+        tags = self.get_tag_mappings()
+        match = [i for i in tags if i['jira_value'] == tag and i['type'] == 'component']
+        if len(match) == 0:
+            return None
+        elif len(match) == 1:
+            return match[0]
+        else:
+            raise APIError('too many matches in tag set.. please review')
+
+    def jira_service_area_from_mapping(self, tag):
+        tags = self.get_tag_mappings()
+        match = [i for i in tags if i['jira_value'] == tag and i['type'] == 'service_area']
+        if len(match) == 0:
+            return None
+        elif len(match) == 1:
+            return match[0]
+        else:
+            raise APIError('too many matches in tag set.. please review')
     
     def get_tag_from_techconnect(self, tag):
         tags = self.get_tag_mappings()
@@ -122,33 +140,34 @@ class LookupClient:
         else:
             raise APIError('too many matches in tag set.. please review')
 
-def normalize_email_address(email_address):
-    """
-    normalize email addresses passed to the API. lowercases and checks for the right number of parts, tufts.edu domain
-    :param email_address:
-    :return:
-    """
-    em_parts = [] if email_address is None else email_address.split('@')
-    if len(em_parts) != 2 or len(em_parts[0]) == 0 or len(em_parts[0]) > 50:
-        raise InvalidEmailAddressError('Malformed email address')
-    if len(em_parts[1].split('.')) < 2 or len(em_parts[1]) > 50:
-        raise InvalidEmailAddressError('Malformed email domain')
-    return f'{em_parts[0].strip().lower()}@{em_parts[1].strip().lower()}'
+    @staticmethod
+    def normalize_email_address(email_address):
+        """
+        normalize email addresses passed to the API. lowercases and checks for the right number of parts, tufts.edu domain
+        :param email_address:
+        :return:
+        """
+        em_parts = [] if email_address is None else email_address.split('@')
+        if len(em_parts) != 2 or len(em_parts[0]) == 0 or len(em_parts[0]) > 50:
+            raise InvalidEmailAddressError('Malformed email address')
+        if len(em_parts[1].split('.')) < 2 or len(em_parts[1]) > 50:
+            raise InvalidEmailAddressError('Malformed email domain')
+        return f'{em_parts[0].strip().lower()}@{em_parts[1].strip().lower()}'
 
-
-def normalize_course_cat_no(course_catalog_no):
-    """
-    normalize course catalog numbers passed to the API.
-    :param course_catalog_no:
-    :return:
-    """
-    if course_catalog_no is None:
-        course_catalog_no = ''
-    pieces = course_catalog_no.strip().split()
-    if len(pieces) >= 2:
-        return ' '.join(pieces[:2]).upper()
-    else:
-        pieces = course_catalog_no.strip().split('_')
-        if len(pieces) >=2:
+    @staticmethod
+    def normalize_course_cat_no(course_catalog_no):
+        """
+        normalize course catalog numbers passed to the API.
+        :param course_catalog_no:
+        :return:
+        """
+        if course_catalog_no is None:
+            course_catalog_no = ''
+        pieces = course_catalog_no.strip().split()
+        if len(pieces) >= 2:
             return ' '.join(pieces[:2]).upper()
-    raise InvalidCourseCatalogNumberError('Malformed Course Catalog number')
+        else:
+            pieces = course_catalog_no.strip().split('_')
+            if len(pieces) >=2:
+                return ' '.join(pieces[:2]).upper()
+        raise InvalidCourseCatalogNumberError('Malformed Course Catalog number')
