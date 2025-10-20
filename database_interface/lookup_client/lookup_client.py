@@ -103,11 +103,15 @@ class LookupClient:
         return info
 
     def jira_tag_from_mapping(self, tag):
-        pass
+        raise NotImplementedError('This method is not yet implemented')
 
     def get_tag_mappings(self):
-        return []
+        raise NotImplementedError('This method is not yet implemented')
 
+    def get_rt_members(self):
+        r = self.dbi.fetch("SELECT utln FROM rt_staff WHERE rt_staff_status = 'A'")
+        return [i[0] for i in r]
+    
     def get_tag_from_techconnect(self, tag):
         tags = self.get_tag_mappings()
         match = [i for i in tags if i['snow_tag'] == tag]
