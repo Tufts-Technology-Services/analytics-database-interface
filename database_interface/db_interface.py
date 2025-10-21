@@ -141,7 +141,7 @@ class DatabaseInterface:
         :return:
         """
         insp = inspect(self.engine)
-        return insp.has_table(table_name, schema=self.database)
+        return insp.has_table(table_name)
 
     def append_df(self, dataframe, table_name):
         """
