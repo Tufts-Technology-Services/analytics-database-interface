@@ -108,7 +108,7 @@ class LookupClient:
 
     def get_tag_mappings(self):
         r = self.dbi.fetch("SELECT value, snow_tag FROM rt_service_areas union SELECT value, snow_tag FROM rt_components")
-        return [{'jira_value': i[0], 'snow_tag': i[1], 'type': 'service_area' if i[1].startswith('sa.') else 'component'} for i in r]
+        return [{'jira_value': i[0], 'snow_tag': i[1], 'type': 'service_area' if i[1].startswith('sa.') else 'component'} for i in r if i[1] is not None]
     
     def tag_from_jira_component(self, tag):
         tags = self.get_tag_mappings()
