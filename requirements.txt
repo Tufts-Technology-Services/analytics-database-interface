@@ -1,4 +1,0 @@
-pandas==2.2.2
-psycopg2==2.9.1
-#PyMySQL==1.1.1
-SQLAlchemy==2.0.32
