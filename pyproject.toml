@@ -7,13 +7,13 @@ dependencies = [
     "pandas>=2.0",
     "PyMySQL>=1.1.0",
     "SQLAlchemy>=2.0",
-    "pytest"
+    "pytest",
 ]
 requires-python = ">= 3.11"
 
 [project.optional-dependencies]
 mysql = ["PyMySQL"]
-postgres = ["psycopg[binary]"]
+postgres = ["psycopg2-binary"]
 
 [build-system]
 requires = [
