@@ -1,6 +1,9 @@
 from sqlalchemy import create_engine
 import urllib.parse
 
+# flavor -> the extra in pyproject.toml that installs its driver
+DRIVER_EXTRAS = {'postgres': 'postgres', 'mysql': 'mysql'}
+
 
 def create_db_engine(user=None, passwd=None, server='localhost', database='rt_analytics',
                      flavor='postgres', verbose=False):
@@ -24,4 +27,9 @@ def create_db_engine(user=None, passwd=None, server='localhost', database='rt_an
         connection_string = f'mssql+pymssql://{user}:{passwd}@{server}/{database}?charset=utf8'
     else:
         raise Exception(f'unimplemented database type {flavor}')
-    return create_engine(connection_string, echo=verbose)
+    try:
+        return create_engine(connection_string, echo=verbose)
+    except ModuleNotFoundError as e:
+        # the drivers are optional extras
+        hint = f'install database-interface[{DRIVER_EXTRAS[flavor]}]' if flavor in DRIVER_EXTRAS else f'install {e.name}'
+        raise ModuleNotFoundError(f'the {flavor} flavor needs the {e.name} driver: {hint}', name=e.name) from e
