@@ -1,19 +1,26 @@
 [project]
 name = "database-interface"
-version = "0.3.0"
+version = "0.4.0"
 description = "code to abstract working with rt-analytics database"
 authors = [{name="Chris Barnett", email="Christopher.Barnett@tufts.edu"}]
 dependencies = [
-    "pandas>=2.0",
-    "PyMySQL>=1.1.0",
-    "SQLAlchemy",
-    "pytest",
+    # pandas before 2.1.2 doesn't cap NumPy below 2, which it can't import
+    "pandas>=2.1.2",
+    # written and tested against SQLAlchemy 2
+    "SQLAlchemy>=2.0",
 ]
 requires-python = ">= 3.11"
 
+# database drivers; install the one for your flavor, e.g. database-interface[postgres]
 [project.optional-dependencies]
-mysql = ["PyMySQL"]
+mysql = ["PyMySQL>=1.1.0"]
 postgres = ["psycopg2-binary"]
+
+[dependency-groups]
+dev = ["pytest"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 
 [build-system]
 requires = [
